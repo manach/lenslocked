@@ -2,56 +2,27 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joncalhoun/lenslocked/controllers"
+	"github.com/joncalhoun/lenslocked/templates"
 	"github.com/joncalhoun/lenslocked/views"
 )
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, filepath.Join("templates", "home.gohtml"))
-}
-
-func contactHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, filepath.Join("templates", "contact.gohtml"))
-}
-
-func faqHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, filepath.Join("templates", "faq.gohtml"))
-}
-
-func getGalleryHandler(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userID")
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "The given user ID is ", userID)
-}
-
-func executeTemplate(w http.ResponseWriter, filepath string) {
-	tpl, err := views.Parse(filepath)
-	if err != nil {
-		log.Printf("parsing template: %v", err)
-		http.Error(w, "There was an error parsing the template.", http.StatusInternalServerError)
-		return
-	}
-	tpl.Execute(w, nil)
-}
 
 func main() {
 	r := chi.NewRouter()
 
-	tpl := views.Must(views.Parse(filepath.Join("templates", "home.gohtml")))
+	tpl := views.Must(views.ParseFS(templates.FS, "layout-page.gohtml", "home-page.gohtml"))
 	r.Get("/", controllers.StaticHandler(tpl))
 
-	tpl = views.Must(views.Parse(filepath.Join("templates", "contact.gohtml")))
+	tpl = views.Must(views.ParseFS(templates.FS, "layout-page.gohtml", "contact-page.gohtml"))
 	r.Get("/contact", controllers.StaticHandler(tpl))
 
-	tpl = views.Must(views.Parse(filepath.Join("templates", "faq.gohtml")))
-	r.Get("/faq", controllers.StaticHandler(tpl))
+	tpl = views.Must(views.ParseFS(templates.FS, "faq.gohtml"))
+	r.Get("/faq", controllers.FAQ(tpl))
 
-	tpl = views.Must(views.Parse(filepath.Join("templates", "trees.gohtml")))
+	tpl = views.Must(views.ParseFS(templates.FS, "trees.gohtml"))
 	r.Get("/trees", controllers.StaticHandler(tpl))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
