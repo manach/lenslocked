@@ -25,6 +25,9 @@ func main() {
 	tpl = views.Must(views.ParseFS(templates.FS, "trees.gohtml", "tailwind.gohtml"))
 	r.Get("/trees", controllers.StaticHandler(tpl))
 
+	tpl = views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
+	r.Get("/signup", controllers.StaticHandler(tpl))
+
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Sorry, we are unable to find that page.", http.StatusNotFound)
 	})
